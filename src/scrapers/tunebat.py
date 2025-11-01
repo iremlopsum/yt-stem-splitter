@@ -2,17 +2,19 @@
 
 import os
 import time
-import platform
-import subprocess
+import tempfile
+import shutil
 from typing import Optional, Tuple
 from urllib.parse import quote
 
 # Suppress Selenium/ChromeDriver logging
 os.environ['WDM_LOG_LEVEL'] = '0'
 
-# Check if Selenium and undetected_chromedriver are available
+# Check if Selenium is available
 try:
-    import undetected_chromedriver as uc
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.chrome.options import Options
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
@@ -26,38 +28,12 @@ def is_tunebat_available() -> bool:
     return TUNEBAT_AVAILABLE
 
 
-def _hide_chrome_window(driver) -> None:
-    """Attempt to hide or minimize the Chrome window."""
-    try:
-        driver.minimize_window()
-    except:
-        # If minimize doesn't work, try to move it off-screen
-        try:
-            driver.set_window_position(-2000, -2000)
-            driver.set_window_size(1, 1)
-        except:
-            pass
-    
-    # On macOS, try to hide Chrome completely using AppleScript
-    if platform.system() == 'Darwin':
-        try:
-            subprocess.run(
-                ['osascript', '-e', 
-                 'tell application "System Events" to set visible of process "Google Chrome" to false'],
-                capture_output=True,
-                timeout=1
-            )
-        except:
-            pass
-
-
-def _extract_track_info(driver, wait: WebDriverWait) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+def _extract_track_info(driver) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
     Extract BPM, key, and Camelot from TuneBat page.
     
     Args:
         driver: Selenium WebDriver instance
-        wait: WebDriverWait instance
         
     Returns:
         Tuple of (bpm, key, camelot)
@@ -67,38 +43,27 @@ def _extract_track_info(driver, wait: WebDriverWait) -> Tuple[Optional[str], Opt
     camelot = None
     
     try:
-        # Get BPM
-        bpm_label = driver.find_element(
-            By.XPATH,
-            "//span[contains(@class, 'ant-typography-secondary') and text()='BPM']"
-        )
-        bpm_parent = bpm_label.find_element(By.XPATH, "..")
-        bpm_element = bpm_parent.find_element(By.TAG_NAME, "h3")
-        bpm = bpm_element.text.strip()
-    except:
-        pass
-    
-    try:
-        # Get Key
-        key_label = driver.find_element(
-            By.XPATH,
-            "//span[contains(@class, 'ant-typography-secondary') and text()='key']"
-        )
-        key_parent = key_label.find_element(By.XPATH, "..")
-        key_element = key_parent.find_element(By.TAG_NAME, "h3")
-        key = key_element.text.strip()
-    except:
-        pass
-    
-    try:
-        # Get Camelot
-        camelot_label = driver.find_element(
-            By.XPATH,
-            "//span[contains(@class, 'ant-typography-secondary') and text()='camelot']"
-        )
-        camelot_parent = camelot_label.find_element(By.XPATH, "..")
-        camelot_element = camelot_parent.find_element(By.TAG_NAME, "h3")
-        camelot = camelot_element.text.strip()
+        # Find all info containers
+        info_containers = driver.find_elements(By.CSS_SELECTOR, 'div.yIPfN')
+        
+        for container in info_containers:
+            try:
+                # Get the label (in span with ant-typography-secondary class)
+                label_element = container.find_element(By.CSS_SELECTOR, 'span.ant-typography-secondary')
+                label = label_element.text.strip().lower()
+                
+                # Get the value (in h3 with ant-typography class)
+                value_element = container.find_element(By.CSS_SELECTOR, 'h3.ant-typography')
+                value = value_element.text.strip()
+                
+                if 'bpm' in label:
+                    bpm = value
+                elif 'key' in label:
+                    key = value
+                elif 'camelot' in label:
+                    camelot = value
+            except:
+                continue
     except:
         pass
     
@@ -115,7 +80,7 @@ def scrape_tunebat_info(
     
     Args:
         track_title: Title of the track to search for
-        chrome_version: Chrome driver version to use
+        chrome_version: Chrome driver version to use (kept for API compatibility, not used)
         silent: If True, suppress print statements
         
     Returns:
@@ -128,44 +93,49 @@ def scrape_tunebat_info(
         return None, None, None
     
     driver = None
+    temp_dir = None
     try:
         if not silent:
             print("Searching TuneBat for track information...")
         
-        # Set up undetected Chrome
-        options = uc.ChromeOptions()
+        # Set up headless Chrome options
+        options = Options()
+        options.add_argument('--headless=new')  # Use new headless mode
+        options.add_argument('--disable-gpu')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument('--log-level=3')  # Suppress Chrome logs
-        options.add_argument('--disable-logging')
-        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        options.add_argument('--window-size=1920,1080')
         
-        # Initialize driver (suppress logs)
+        # Add a realistic user agent to avoid bot detection
+        options.add_argument('user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        
+        # Disable automation flags
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option('useAutomationExtension', False)
+        options.add_argument('--disable-blink-features=AutomationControlled')
+        
+        # Use a unique temporary user data directory to avoid conflicts
+        temp_dir = tempfile.mkdtemp()
+        options.add_argument(f'--user-data-dir={temp_dir}')
+        
+        # Suppress logging
         import logging
         logging.getLogger('selenium').setLevel(logging.ERROR)
         logging.getLogger('urllib3').setLevel(logging.ERROR)
         
-        driver = uc.Chrome(
-            options=options,
-            version_main=chrome_version,
-            use_subprocess=True,
-            driver_executable_path=None,
-            browser_executable_path=None,
-            headless=False
-        )
-        
-        # Hide the window
-        _hide_chrome_window(driver)
+        # Initialize ChromeDriver
+        service = Service()
+        driver = webdriver.Chrome(service=service, options=options)
         
         # Search TuneBat
         search_query = quote(track_title)
         search_url = f"https://tunebat.com/Search?q={search_query}"
         driver.get(search_url)
         
-        # Wait for search results
-        time.sleep(3)
-        wait = WebDriverWait(driver, 10)
+        # Wait for Cloudflare and page to load
+        time.sleep(10)  # Give Cloudflare time to pass
+        wait = WebDriverWait(driver, 15)
         
         # Find first search result link
         try:
@@ -178,16 +148,10 @@ def scrape_tunebat_info(
             
             # Navigate to song page
             driver.get(result_url)
-            time.sleep(3)
-            
-            # Scroll to trigger lazy loading
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(2)
-            driver.execute_script("window.scrollTo(0, 0);")
-            time.sleep(1)
+            time.sleep(10)  # Wait for page to load (including Cloudflare)
             
             # Extract song information
-            bpm, key, camelot = _extract_track_info(driver, wait)
+            bpm, key, camelot = _extract_track_info(driver)
             
             if bpm or key:
                 if not silent:
@@ -196,18 +160,6 @@ def scrape_tunebat_info(
             else:
                 if not silent:
                     print("Could not extract BPM/Key from TuneBat page")
-                    # Debug info
-                    try:
-                        all_secondary_spans = driver.find_elements(
-                            By.CLASS_NAME,
-                            "ant-typography-secondary"
-                        )
-                        print(f"  Found {len(all_secondary_spans)} label elements")
-                        if all_secondary_spans:
-                            labels = [span.text for span in all_secondary_spans[:5]]
-                            print(f"  Labels: {labels}")
-                    except:
-                        pass
                 return None, None, None
                 
         except Exception as e:
@@ -224,6 +176,13 @@ def scrape_tunebat_info(
         if driver:
             try:
                 driver.quit()
+            except:
+                pass
+        
+        # Clean up temporary user data directory
+        if temp_dir and os.path.exists(temp_dir):
+            try:
+                shutil.rmtree(temp_dir)
             except:
                 pass
 
