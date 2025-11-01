@@ -52,12 +52,14 @@ def download_youtube_audio(
     os.makedirs(output_dir, exist_ok=True)
     
     # Download audio
+    # Use Android client to work around YouTube 403 errors
     output_template = os.path.join(output_dir, "%(title)s.%(ext)s")
     run_command([
         "yt-dlp",
         "--no-playlist",
         "--extract-audio",
         "--audio-format", audio_format,
+        "--extractor-args", "youtube:player_client=android",
         "-o", output_template,
         url
     ])

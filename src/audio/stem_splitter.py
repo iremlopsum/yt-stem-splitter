@@ -57,9 +57,10 @@ def split_audio_stems(
     if not os.path.exists(instrumental_path):
         raise FileNotFoundError(f"Expected instrumental file not found: {instrumental_path}")
     
-    # Copy results to current directory with descriptive names
-    out_vocals = f"{basename}_vocals.wav"
-    out_instrumental = f"{basename}_instrumental.wav"
+    # Copy results to current working directory with descriptive names
+    cwd = os.getcwd()
+    out_vocals = os.path.join(cwd, f"{basename}_vocals.wav")
+    out_instrumental = os.path.join(cwd, f"{basename}_instrumental.wav")
     
     shutil.copyfile(vocals_path, out_vocals)
     shutil.copyfile(instrumental_path, out_instrumental)

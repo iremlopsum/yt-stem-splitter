@@ -150,7 +150,9 @@ def main():
         sys.exit(1)
 
     # Split stems (run split_stems.py with CWD=target_dir so outputs land next to wav)
-    split_script = os.path.join(os.path.dirname(script_dir), "split_stems.py")
+    # Look for split_stems.py in project root (two levels up from src/cli/)
+    project_root = os.path.dirname(os.path.dirname(script_dir))
+    split_script = os.path.join(project_root, "split_stems.py")
     if not os.path.isfile(split_script):
         print(f"Warning: '{split_script}' not found. Skipping stem split.")
     else:
