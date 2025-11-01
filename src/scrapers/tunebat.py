@@ -1,10 +1,14 @@
 """TuneBat web scraping for BPM and key information."""
 
+import os
 import time
 import platform
 import subprocess
 from typing import Optional, Tuple
 from urllib.parse import quote
+
+# Suppress Selenium/ChromeDriver logging
+os.environ['WDM_LOG_LEVEL'] = '0'
 
 # Check if Selenium and undetected_chromedriver are available
 try:
@@ -103,7 +107,8 @@ def _extract_track_info(driver, wait: WebDriverWait) -> Tuple[Optional[str], Opt
 
 def scrape_tunebat_info(
     track_title: str,
-    chrome_version: int = 141
+    chrome_version: int = 141,
+    silent: bool = False
 ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
     Scrape TuneBat for BPM and key information.
@@ -111,6 +116,7 @@ def scrape_tunebat_info(
     Args:
         track_title: Title of the track to search for
         chrome_version: Chrome driver version to use
+        silent: If True, suppress print statements
         
     Returns:
         Tuple of (bpm, key, camelot) where each can be None if not found
@@ -123,19 +129,30 @@ def scrape_tunebat_info(
     
     driver = None
     try:
-        print("Searching TuneBat for track information...")
+        if not silent:
+            print("Searching TuneBat for track information...")
         
         # Set up undetected Chrome
         options = uc.ChromeOptions()
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--disable-blink-features=AutomationControlled')
+        options.add_argument('--log-level=3')  # Suppress Chrome logs
+        options.add_argument('--disable-logging')
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
         
-        # Initialize driver
+        # Initialize driver (suppress logs)
+        import logging
+        logging.getLogger('selenium').setLevel(logging.ERROR)
+        logging.getLogger('urllib3').setLevel(logging.ERROR)
+        
         driver = uc.Chrome(
             options=options,
             version_main=chrome_version,
-            use_subprocess=True
+            use_subprocess=True,
+            driver_executable_path=None,
+            browser_executable_path=None,
+            headless=False
         )
         
         # Hide the window
@@ -156,7 +173,8 @@ def scrape_tunebat_info(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='/Info/']"))
             )
             result_url = first_result.get_attribute('href')
-            print(f"Found TuneBat page: {result_url}")
+            if not silent:
+                print(f"Found TuneBat page: {result_url}")
             
             # Navigate to song page
             driver.get(result_url)
@@ -172,30 +190,34 @@ def scrape_tunebat_info(
             bpm, key, camelot = _extract_track_info(driver, wait)
             
             if bpm or key:
-                print(f"✓ Retrieved from TuneBat: BPM={bpm}, Key={key}, Camelot={camelot}")
+                if not silent:
+                    print(f"✓ Retrieved from TuneBat: BPM={bpm}, Key={key}, Camelot={camelot}")
                 return bpm, key, camelot
             else:
-                print("Could not extract BPM/Key from TuneBat page")
-                # Debug info
-                try:
-                    all_secondary_spans = driver.find_elements(
-                        By.CLASS_NAME,
-                        "ant-typography-secondary"
-                    )
-                    print(f"  Found {len(all_secondary_spans)} label elements")
-                    if all_secondary_spans:
-                        labels = [span.text for span in all_secondary_spans[:5]]
-                        print(f"  Labels: {labels}")
-                except:
-                    pass
+                if not silent:
+                    print("Could not extract BPM/Key from TuneBat page")
+                    # Debug info
+                    try:
+                        all_secondary_spans = driver.find_elements(
+                            By.CLASS_NAME,
+                            "ant-typography-secondary"
+                        )
+                        print(f"  Found {len(all_secondary_spans)} label elements")
+                        if all_secondary_spans:
+                            labels = [span.text for span in all_secondary_spans[:5]]
+                            print(f"  Labels: {labels}")
+                    except:
+                        pass
                 return None, None, None
                 
         except Exception as e:
-            print(f"Could not find song on TuneBat: {e}")
+            if not silent:
+                print(f"Could not find song on TuneBat: {e}")
             return None, None, None
     
     except Exception as e:
-        print(f"TuneBat scraping failed: {e}")
+        if not silent:
+            print(f"TuneBat scraping failed: {e}")
         return None, None, None
     
     finally:
