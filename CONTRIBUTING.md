@@ -17,7 +17,7 @@ Thank you for your interest in contributing to Stems! This document provides gui
 
 ```bash
 # Fork the repository on GitHub, then:
-git clone https://github.com/YOUR_USERNAME/stems.git
+git clone https://github.com/iremlopsum/stems.git
 cd stems
 ```
 
@@ -401,8 +401,8 @@ __all__ = [..., "analyze_function"]
 
 ## ❓ Getting Help
 
-- 💬 [GitHub Discussions](https://github.com/yourusername/stems/discussions)
-- 🐛 [Issue Tracker](https://github.com/yourusername/stems/issues)
+- 💬 [GitHub Discussions](https://github.com/iremlopsum/stems/discussions)
+- 🐛 [Issue Tracker](https://github.com/iremlopsum/stems/issues)
 - 📧 Email: your.email@example.com
 
 ## 📜 License

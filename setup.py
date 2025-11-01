@@ -13,7 +13,7 @@ setup(
     description="Audio processing toolkit for YouTube downloads and stem separation",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/stems",
+    url="https://github.com/iremlopsum/stems",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
