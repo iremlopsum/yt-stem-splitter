@@ -1,0 +1,13 @@
+# Core dependencies
+yt-dlp>=2023.0.0
+
+# Optional dependencies for audio analysis
+essentia>=2.1b6
+
+# Optional dependencies for TuneBat scraping
+undetected-chromedriver>=3.5.0
+selenium>=4.0.0
+
+# Note: Demucs should be installed separately in your environment
+# Install with: pip install demucs
+

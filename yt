@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+"""Entry point for yt CLI - imports from src.cli.yt_cli."""
+
+from src.cli.yt_cli import main
+
+if __name__ == "__main__":
+    main()
