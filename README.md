@@ -106,7 +106,7 @@ safe_name = sanitize_filename("Song (feat. Artist)")
 
 - **essentia** - For audio analysis (BPM/key detection)
 - **demucs** - For stem separation
-- **selenium + undetected-chromedriver** - For TuneBat scraping
+- **selenium** - For TuneBat scraping
 
 Install all dependencies:
 
@@ -289,7 +289,7 @@ if is_tunebat_available():
     print(f"TuneBat data: {bpm} BPM, {key}, Camelot {camelot}")
 else:
     print("TuneBat dependencies not installed")
-    print("Install with: pip install undetected-chromedriver selenium")
+    print("Install with: pip install selenium")
 ```
 
 ## 🐛 Troubleshooting
@@ -309,7 +309,8 @@ pip install essentia
 ### "TuneBat scraping not working"
 
 ```bash
-pip install undetected-chromedriver selenium
+pip install selenium
+# Also ensure you have Chrome/Chromium installed
 ```
 
 ### Tests failing

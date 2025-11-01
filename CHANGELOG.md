@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- TuneBat scraper now uses standard Selenium instead of undetected-chromedriver
+- Updated CSS selectors to match current TuneBat page structure (div.yIPfN containers)
+- Added Cloudflare bot detection bypass with custom user-agent and headless mode
+- Improved page load wait times for reliable scraping
+
 ### Added
 - Initial release of Stems audio processing toolkit
 - YouTube audio download functionality using yt-dlp
