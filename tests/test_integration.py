@@ -46,6 +46,7 @@ def normalize_key(key_str: Optional[str]) -> Optional[str]:
     Handles formats like:
     - "G Major", "G major", "g major", "G"
     - "A# Minor", "A#min", "A# min", "A#m"
+    - "G♯ Minor" (unicode sharp symbol)
     
     Args:
         key_str: Key as string or None
@@ -58,12 +59,19 @@ def normalize_key(key_str: Optional[str]) -> Optional[str]:
     
     key_str = str(key_str).strip()
     
+    # Replace unicode sharp symbol with #
+    key_str = key_str.replace('♯', '#')
+    # Replace unicode flat symbol with b
+    key_str = key_str.replace('♭', 'b')
+    
     # Extract note (e.g., "G", "A#", "Bb")
     note_match = re.match(r'^([A-G][#b]?)', key_str, re.IGNORECASE)
     if not note_match:
         return None
     
-    note = note_match.group(1).upper()
+    # Uppercase the letter, but keep # and b as-is
+    note_raw = note_match.group(1)
+    note = note_raw[0].upper() + note_raw[1:].lower() if len(note_raw) > 1 else note_raw.upper()
     
     # Detect major/minor
     key_lower = key_str.lower()
@@ -214,12 +222,12 @@ class TestYouTubeIntegration(unittest.TestCase):
     
     def test_youtube_url_2_metadata(self):
         """
-        Test YouTube URL: https://www.youtube.com/watch?v=AtNjDbxQZQI
-        Expected: BPM=99, Key=A#min
+        Test YouTube URL: https://www.youtube.com/watch?v=fswfZjDerAs
+        Expected: BPM=97, Key=G#min
         """
-        url = "https://www.youtube.com/watch?v=AtNjDbxQZQI&list=LL&index=27"
-        expected_bpm = 99
-        expected_key = "A#min"
+        url = "https://www.youtube.com/watch?v=fswfZjDerAs&list=LL&index=31"
+        expected_bpm = 97
+        expected_key = "G#min"
         
         # Get title
         try:

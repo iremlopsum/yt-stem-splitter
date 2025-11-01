@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -47,6 +47,9 @@ dev = [
 [project.scripts]
 stems-yt = "src.cli.yt_cli:main"
 stems-split = "src.cli.split_stems_cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.black]
 line-length = 100
