@@ -76,7 +76,9 @@
 - Thin wrappers that orchestrate other modules
 - Handle command-line argument parsing
 - Coordinate workflow between modules
-- Print user-friendly messages
+- Print user-friendly messages with progress bars
+- Auto-generate markdown summary files
+- Integrate with browser and file system (Google search, Finder/Explorer)
 
 **Testing:** Integration tests or manual testing (CLI is tested through underlying modules)
 
@@ -151,10 +153,10 @@
 
 ## Module Interaction Patterns
 
-### Pattern 1: Download Workflow
+### Pattern 1: Complete Download Workflow
 
 ```python
-# yt CLI orchestrates multiple modules
+# yt CLI orchestrates multiple modules with progress tracking
 def main():
     # 1. Dependency check (utils)
     ensure_dependency("yt-dlp")
@@ -165,14 +167,23 @@ def main():
     # 3. Sanitize (utils)
     safe_title = sanitize_filename(title)
 
-    # 4. Download (downloader)
-    wav_path = download_youtube_audio(url, safe_title)
+    # 4. Download with progress bar (downloader)
+    wav_path = download_youtube_audio(url, safe_title, progress_bar=download_bar)
 
-    # 5. Analyze (audio)
-    bpm, key, _ = analyze_audio_bpm_key(wav_path)
+    # 5. Detect metadata (scrapers + audio)
+    bpm, key, camelot, sources = detect_track_metadata(title, wav_path, metadata_bar)
 
-    # 6. Scrape (scrapers)
-    tunebat_bpm, tunebat_key, _ = scrape_tunebat_info(title)
+    # 6. Split stems (audio)
+    split_audio_stems(wav_path, progress_bar=stems_bar)
+
+    # 7. Generate markdown summary
+    write_track_info_markdown(md_path, title, url, bpm, key, camelot, sources)
+
+    # 8. Open browser for verification
+    run_command(["open", google_search_url])
+
+    # 9. Open Finder/Explorer
+    run_command(["open", target_dir])
 ```
 
 ### Pattern 2: Stem Splitting Workflow
@@ -229,15 +240,18 @@ from src.cli.yt_cli import main  # NEVER DO THIS!
 
 ### Test Organization
 
+Total: 55 tests (39 unit, 16 integration)
+
 ```
 tests/
-├── test_sanitization.py         → src/utils/sanitization.py
-├── test_subprocess_utils.py     → src/utils/subprocess_utils.py
-├── test_file_utils.py           → src/utils/file_utils.py
-├── test_audio_analysis.py       → src/audio/analysis.py
-├── test_stem_splitter.py        → src/audio/stem_splitter.py
-├── test_youtube_downloader.py   → src/downloader/youtube.py
-└── test_tunebat.py              → src/scrapers/tunebat.py
+├── test_sanitization.py         → src/utils/sanitization.py         (9 tests)
+├── test_subprocess_utils.py     → src/utils/subprocess_utils.py     (6 tests)
+├── test_file_utils.py           → src/utils/file_utils.py           (3 tests)
+├── test_audio_analysis.py       → src/audio/analysis.py             (5 tests)
+├── test_stem_splitter.py        → src/audio/stem_splitter.py        (4 tests)
+├── test_youtube_downloader.py   → src/downloader/youtube.py         (6 tests)
+├── test_tunebat.py              → src/scrapers/tunebat.py           (6 tests)
+└── test_integration.py          → Full workflow integration         (16 tests)
 ```
 
 ### Test Pyramid
@@ -257,9 +271,9 @@ tests/
 
 **Distribution:**
 
-- 70% Unit tests (fast, isolated)
-- 25% Integration tests (module interactions)
-- 5% Manual tests (full CLI workflow)
+- 71% Unit tests (39 tests - fast, isolated)
+- 29% Integration tests (16 tests - module interactions)
+- Manual tests as needed (full CLI workflow)
 
 ---
 
@@ -476,12 +490,14 @@ def ensure_dependency(dep: str):
 This architecture provides:
 
 - ✅ Clear separation of concerns
-- ✅ Testable components
+- ✅ Testable components (55 tests)
 - ✅ Reusable modules
 - ✅ Easy to extend
 - ✅ Maintainable codebase
 - ✅ Type-safe interfaces
 - ✅ Well-documented structure
+- ✅ Polished user experience with progress tracking
+- ✅ Integrated workflow with external tools
 
 The layered architecture ensures that:
 

@@ -14,16 +14,18 @@ class TestStemSplitter(unittest.TestCase):
         """Set up test fixtures."""
         self.temp_dir = tempfile.mkdtemp()
     
+    @patch('src.audio.stem_splitter.os.getcwd')
     @patch('src.audio.stem_splitter.run_command')
     @patch('src.audio.stem_splitter.shutil.rmtree')
     @patch('src.audio.stem_splitter.os.makedirs')
     @patch('src.audio.stem_splitter.os.path.exists')
     @patch('src.audio.stem_splitter.shutil.copyfile')
     def test_split_audio_stems_success(
-        self, mock_copy, mock_exists, mock_makedirs, mock_rmtree, mock_run
+        self, mock_copy, mock_exists, mock_makedirs, mock_rmtree, mock_run, mock_getcwd
     ):
         """Test successful stem splitting."""
         input_path = "/path/to/song.wav"
+        mock_getcwd.return_value = "/current/dir"
         
         # Mock file existence checks
         def exists_side_effect(path):
@@ -51,9 +53,9 @@ class TestStemSplitter(unittest.TestCase):
         self.assertIn("--two-stems", actual_cmd)
         self.assertIn("vocals", actual_cmd)
         
-        # Verify output files
-        self.assertEqual(vocals, "song_vocals.wav")
-        self.assertEqual(instrumental, "song_instrumental.wav")
+        # Verify output files contain the basename
+        self.assertTrue(vocals.endswith("song_vocals.wav"))
+        self.assertTrue(instrumental.endswith("song_instrumental.wav"))
         
         # Verify files were copied
         self.assertEqual(mock_copy.call_count, 2)

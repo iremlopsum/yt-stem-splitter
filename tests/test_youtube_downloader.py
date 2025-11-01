@@ -35,7 +35,7 @@ class TestYouTubeDownloader(unittest.TestCase):
         
         self.assertEqual(title, "Song (feat. Artist) - Remix")
     
-    @patch('src.downloader.youtube.run_command')
+    @patch('src.downloader.youtube.subprocess.run')
     @patch('src.downloader.youtube.os.makedirs')
     @patch('src.downloader.youtube.os.listdir')
     @patch('src.downloader.youtube.os.path.getmtime')
@@ -55,7 +55,7 @@ class TestYouTubeDownloader(unittest.TestCase):
         mock_makedirs.assert_called_once_with("/output/dir", exist_ok=True)
         mock_run.assert_called_once()
     
-    @patch('src.downloader.youtube.run_command')
+    @patch('src.downloader.youtube.subprocess.run')
     @patch('src.downloader.youtube.os.makedirs')
     @patch('src.downloader.youtube.os.listdir')
     def test_download_youtube_audio_no_file_found(
@@ -72,7 +72,7 @@ class TestYouTubeDownloader(unittest.TestCase):
         
         self.assertIn("No WAV file found", str(cm.exception))
     
-    @patch('src.downloader.youtube.run_command')
+    @patch('src.downloader.youtube.subprocess.run')
     @patch('src.downloader.youtube.os.makedirs')
     @patch('src.downloader.youtube.os.listdir')
     @patch('src.downloader.youtube.os.path.getmtime')
@@ -97,7 +97,7 @@ class TestYouTubeDownloader(unittest.TestCase):
         format_idx = actual_cmd.index("--audio-format")
         self.assertEqual(actual_cmd[format_idx + 1], "mp3")
     
-    @patch('src.downloader.youtube.run_command')
+    @patch('src.downloader.youtube.subprocess.run')
     @patch('src.downloader.youtube.os.makedirs')
     @patch('src.downloader.youtube.os.listdir')
     @patch('src.downloader.youtube.os.path.getmtime')

@@ -1,10 +1,10 @@
 # Stems - Audio Processing Toolkit
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
 
-A Python toolkit for downloading YouTube audio, analyzing BPM/key, and separating audio stems using Demucs.
+A Python toolkit for downloading YouTube audio, analyzing BPM/key, and separating audio stems using Demucs. Features an elegant CLI with progress bars, automatic metadata detection, and organized output.
 
 ## ✨ Features
 
@@ -13,8 +13,9 @@ A Python toolkit for downloading YouTube audio, analyzing BPM/key, and separatin
 - 🎧 **Stem Separation** - Split audio into vocals and instrumentals using Demucs
 - 🌐 **TuneBat Integration** - Scrape accurate BPM/key from TuneBat database
 - 📊 **Audio Analysis** - Analyze tracks using Essentia library
-- 🧪 **Well-Tested** - 50+ unit and integration tests with 90%+ coverage
+- 🧪 **Well-Tested** - 55+ unit and integration tests with high coverage
 - 📦 **Modular Design** - Use as CLI or import as Python library
+- ✨ **Polished UX** - Progress bars, auto-generated markdown, browser/Finder integration
 
 ## 🚀 Quick Start
 
@@ -25,11 +26,18 @@ A Python toolkit for downloading YouTube audio, analyzing BPM/key, and separatin
 git clone https://github.com/yourusername/stems.git
 cd stems
 
+# Create and activate virtual environment (recommended)
+python3 -m venv demucs-env
+source demucs-env/bin/activate  # On Windows: demucs-env\Scripts\activate
+
 # Install the package
 pip install -e .
 
 # Install with optional features
 pip install -e ".[audio,scraping]"
+
+# Install development dependencies
+pip install -r requirements-dev.txt
 ```
 
 ### Basic Usage
@@ -37,15 +45,28 @@ pip install -e ".[audio,scraping]"
 **As Command Line Tool:**
 
 ```bash
-# Download YouTube audio and analyze
+# Download YouTube audio, detect BPM/key, and split stems (all-in-one)
 ./yt "https://youtube.com/watch?v=..."
 
-# Or with manual BPM/key
+# With manual BPM/key override
 ./yt "https://youtube.com/watch?v=..." 128 "A Minor"
 
-# Split audio into stems
+# Or use the installed command
+stems-yt "https://youtube.com/watch?v=..."
+
+# Split audio into stems only
+stems-split path/to/audio.wav
+# or
 python split_stems.py path/to/audio.wav
 ```
+
+The `yt` command will:
+- 📥 Download high-quality audio from YouTube
+- 🎹 Detect BPM and key (via TuneBat and/or Essentia)
+- ✂️ Split into vocals and instrumental stems
+- 📝 Generate a markdown summary file
+- 🌐 Open Google search for manual verification
+- 📂 Open Finder/Explorer with the output files
 
 **As Python Library:**
 
@@ -77,8 +98,9 @@ safe_name = sanitize_filename("Song (feat. Artist)")
 
 ### Required
 
-- Python 3.8+
+- Python 3.10+
 - yt-dlp
+- tqdm (for progress bars)
 
 ### Optional
 
@@ -102,20 +124,30 @@ stems/
 ├── src/                        # Source code
 │   ├── audio/                  # Audio processing (analysis, stem splitting)
 │   ├── cli/                    # Command-line interfaces
+│   │   ├── yt_cli.py          # YouTube download + analysis CLI
+│   │   └── split_stems_cli.py # Stem splitting CLI
 │   ├── downloader/             # YouTube downloads
 │   ├── scrapers/               # Web scraping (TuneBat)
 │   └── utils/                  # Shared utilities
-├── tests/                      # Unit & integration tests
-├── yt                          # YouTube download CLI
-├── split_stems.py              # Stem splitting CLI
+├── tests/                      # Unit & integration tests (55+ tests)
+├── yt                          # YouTube download wrapper script
+├── split_stems.py              # Stem splitting wrapper script
+├── run_tests.sh                # Test runner
+├── run_integration_tests.sh    # Integration test runner
 ├── requirements.txt            # Production dependencies
+├── requirements-dev.txt        # Development dependencies
 └── pyproject.toml              # Package configuration
 ```
 
 ## 🧪 Testing
 
+The project has 55+ tests with comprehensive coverage.
+
 ```bash
-# Run unit tests (fast, no network)
+# Run all tests using the test script
+./run_tests.sh
+
+# Or run unit tests directly (fast, no network)
 pytest tests/ --ignore=tests/test_integration.py
 
 # Run all tests including integration tests
@@ -124,8 +156,10 @@ pytest
 # Run with coverage
 pytest --cov=src --cov-report=html
 
-# Run integration tests (validates real YouTube URLs)
+# Run integration tests only (validates real YouTube URLs)
 ./run_integration_tests.sh
+# or
+pytest tests/test_integration.py -v -s
 ```
 
 For detailed testing documentation, see [TESTING.md](TESTING.md).
@@ -191,7 +225,21 @@ Each module has a single, well-defined responsibility:
 
 ## 📝 Examples
 
-### Download and Analyze a Track
+### Complete Workflow (Download + Analyze + Split)
+
+The easiest way is to use the CLI:
+
+```bash
+./yt "https://youtube.com/watch?v=dQw4w9WgXcQ"
+```
+
+This creates an organized output directory with:
+- Original audio (WAV)
+- Vocals stem
+- Instrumental stem
+- Markdown file with metadata
+
+### Download and Analyze Programmatically
 
 ```python
 from src.downloader.youtube import download_youtube_audio, get_youtube_title
@@ -293,7 +341,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🗺️ Roadmap
 
-- [ ] Add support for more stem separation types (drums, bass)
+- [x] Progress bars for better UX
+- [x] Auto-generated markdown summaries
+- [x] Browser integration for verification
+- [x] Finder/Explorer integration
+- [ ] Add support for more stem separation types (drums, bass, other)
 - [ ] Implement playlist batch processing
 - [ ] Add GUI interface
 - [ ] Support for more music metadata sources

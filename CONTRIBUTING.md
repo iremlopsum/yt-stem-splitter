@@ -24,14 +24,20 @@ cd stems
 ### 2. Set Up Development Environment
 
 ```bash
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Create virtual environment (Python 3.10+)
+python3 -m venv demucs-env
+source demucs-env/bin/activate  # On Windows: demucs-env\Scripts\activate
 
 # Install in development mode with all dependencies
 pip install -e ".[audio,scraping,dev]"
 
+# Or install requirements separately
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
 # Verify installation
+./run_tests.sh
+# or
 pytest tests/ --ignore=tests/test_integration.py
 ```
 
@@ -146,14 +152,21 @@ class TestYourFeature(unittest.TestCase):
 
 ### Running Tests
 
+The project has 55 tests (39 unit, 16 integration).
+
 ```bash
-# Run unit tests
+# Run all unit tests with coverage
+./run_tests.sh
+
+# Run unit tests manually
 pytest tests/ --ignore=tests/test_integration.py
 
 # Run with coverage
 pytest --cov=src --cov-report=html
 
 # Run integration tests (requires network)
+./run_integration_tests.sh
+# or
 pytest tests/test_integration.py -v -s
 ```
 
@@ -162,6 +175,7 @@ pytest tests/test_integration.py -v -s
 - Aim for at least 80% test coverage
 - All new functions must be tested
 - Include edge cases and error conditions
+- The project currently maintains high test coverage across all modules
 
 ## 📋 Pull Request Process
 
@@ -170,13 +184,17 @@ pytest tests/test_integration.py -v -s
 Before submitting, make sure:
 
 ```bash
+# Run all tests with coverage
+./run_tests.sh
+
+# Or run manually:
 # Format code
 black src/ tests/
 
 # Check linting
 flake8 src/ tests/
 
-# Run tests
+# Run all tests
 pytest
 
 # Check coverage
@@ -247,8 +265,8 @@ What you expected to happen.
 What actually happened.
 
 **Environment:**
-- OS: [e.g. macOS 13.0]
-- Python version: [e.g. 3.9.7]
+- OS: [e.g. macOS 14.0, Ubuntu 22.04, Windows 11]
+- Python version: [e.g. 3.10.0, 3.11.0, 3.12.0]
 - Package version: [e.g. 0.1.0]
 
 **Additional context**

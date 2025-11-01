@@ -19,10 +19,10 @@ Complete guide for testing the stems audio processing toolkit.
 
 The project has comprehensive test coverage with two types of tests:
 
-- **Unit Tests** (40+ tests) - Fast, mocked, no external dependencies
-- **Integration Tests** (16+ tests) - Validates real YouTube URLs, requires network
+- **Unit Tests** (39 tests) - Fast, mocked, no external dependencies
+- **Integration Tests** (16 tests) - Validates real YouTube URLs, requires network
 
-**Total Coverage:** 50+ tests covering all major functionality
+**Total Coverage:** 55 tests covering all major functionality
 
 ---
 
@@ -31,6 +31,9 @@ The project has comprehensive test coverage with two types of tests:
 ### Quick Commands
 
 ```bash
+# Run all tests using the test script (recommended)
+./run_tests.sh
+
 # Run unit tests only (fast, <1 second)
 pytest tests/ --ignore=tests/test_integration.py
 
@@ -50,10 +53,10 @@ pytest tests/test_integration.py -v -s
 ### Using Test Runner Scripts
 
 ```bash
-# Unit tests
+# All unit tests with coverage
 ./run_tests.sh
 
-# Integration tests
+# Integration tests with network access
 ./run_integration_tests.sh
 ```
 
@@ -89,9 +92,10 @@ tests/
 ├── test_subprocess_utils.py     (6 tests)  - Subprocess helpers
 ├── test_file_utils.py           (3 tests)  - File operations
 ├── test_audio_analysis.py       (5 tests)  - Audio analysis
-├── test_stem_splitter.py        (5 tests)  - Stem separation
+├── test_stem_splitter.py        (4 tests)  - Stem separation
 ├── test_youtube_downloader.py   (6 tests)  - YouTube downloads
 └── test_tunebat.py              (6 tests)  - TuneBat scraping
+Total: 39 unit tests
 ```
 
 **Integration Tests:**
@@ -101,6 +105,7 @@ tests/
     ├── TestYouTubeIntegration   (2 tests)  - URL validation
     ├── TestKeyNormalization     (6 tests)  - Key matching
     └── TestBPMNormalization     (8 tests)  - BPM matching
+Total: 16 integration tests
 ```
 
 ### Test Pyramid
@@ -112,8 +117,8 @@ tests/
       │ Integration │  Some integration tests
       │   (16)      │  (real URLs, network)
       ├─────────────┤
-      │    Unit     │  Many unit tests (40+)
-      │   (40+)     │  (mocked, fast)
+      │    Unit     │  Many unit tests (39)
+      │   (39)      │  (mocked, fast)
       └─────────────┘
 ```
 
@@ -447,6 +452,10 @@ def test_error_case(self):
 ### Generate Coverage Report
 
 ```bash
+# Run tests with coverage using test script
+./run_tests.sh
+
+# Or manually generate reports
 # HTML report
 pytest --cov=src --cov-report=html
 open htmlcov/index.html
@@ -463,6 +472,8 @@ pytest --cov=src --cov-report=xml
 - **Minimum:** 70% coverage
 - **Good:** 80-90% coverage
 - **Excellent:** 95%+ coverage
+
+The project currently maintains high test coverage across all modules.
 
 Focus on:
 - All public functions
@@ -574,12 +585,13 @@ yt-dlp --print "%(title)s" "https://youtube.com/watch?v=33mjGmfy7PA"
 ## Summary
 
 The testing strategy provides:
-- ✅ **Fast unit tests** for rapid development
-- ✅ **Realistic integration tests** for end-to-end validation
-- ✅ **High coverage** (90%+ of testable code)
+- ✅ **Fast unit tests** (39 tests) for rapid development
+- ✅ **Realistic integration tests** (16 tests) for end-to-end validation
+- ✅ **High coverage** across all modules
 - ✅ **Flexible matching** for real-world variations
 - ✅ **CI/CD ready** with separate test suites
 - ✅ **Well-documented** with examples and patterns
+- ✅ **Total: 55 tests** ensuring code quality and reliability
 
 **Remember:** Good tests enable confident refactoring!
 
