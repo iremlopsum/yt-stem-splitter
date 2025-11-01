@@ -468,10 +468,10 @@ This project is built on top of amazing open-source tools:
 
 ## 📞 Support & Community
 
-- 🐛 **[Report a Bug](https://github.com/iremlopsum/stems/issues/new?labels=bug)** - Found an issue? Let us know
-- 💡 **[Request a Feature](https://github.com/iremlopsum/stems/issues/new?labels=enhancement)** - Have an idea? We'd love to hear it
+- 🐛 **[Report a Bug](https://github.com/iremlopsum/stems/issues/new)** - Found an issue? Let us know
+- 💡 **[Request a Feature](https://github.com/iremlopsum/stems/issues/new)** - Have an idea? We'd love to hear it
 - 💬 **[Discussions](https://github.com/iremlopsum/stems/discussions)** - Ask questions, share ideas
-- 📖 **[Documentation](https://github.com/iremlopsum/stems/wiki)** - Comprehensive guides
+- 📖 **[Documentation](https://github.com/iremlopsum/stems)** - Comprehensive guides
 
 ---
 
