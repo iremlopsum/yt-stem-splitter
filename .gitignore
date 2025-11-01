@@ -70,6 +70,7 @@ Thumbs.db
 # Project specific
 demucs_output/
 downloads/
+output/
 *.wav
 *.mp3
 *.flac

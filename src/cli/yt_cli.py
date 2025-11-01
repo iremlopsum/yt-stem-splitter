@@ -145,8 +145,10 @@ def main():
     # Ensure dependencies
     ensure_dependency("yt-dlp")
 
+    # Get project root (two levels up from src/cli/)
     script_dir = os.path.dirname(os.path.realpath(__file__))
-
+    project_root = os.path.dirname(os.path.dirname(script_dir))
+    
     # Get title (silent operation)
     try:
         title = get_youtube_title(url)
@@ -155,7 +157,11 @@ def main():
         sys.exit(1)
 
     safe_title = sanitize_filename(title)
-    target_dir = os.path.join(script_dir, safe_title)
+    output_base = os.path.join(project_root, "output")
+    target_dir = os.path.join(output_base, safe_title)
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(output_base, exist_ok=True)
     
     print(f"\n🎵 Processing: {title}\n")
 
@@ -192,8 +198,6 @@ def main():
             metadata_bar.set_description("🎹 Metadata complete")
 
         # Split stems (run split_stems.py with CWD=target_dir so outputs land next to wav)
-        # Look for split_stems.py in project root (two levels up from src/cli/)
-        project_root = os.path.dirname(os.path.dirname(script_dir))
         split_script = os.path.join(project_root, "split_stems.py")
         if not os.path.isfile(split_script):
             stems_bar.update(100)
