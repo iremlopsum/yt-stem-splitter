@@ -51,7 +51,7 @@
 │  • yt-dlp (YouTube downloads)                                    │
 │  • demucs (stem separation)                                      │
 │  • essentia (audio analysis)                                     │
-│  • selenium + undetected-chromedriver (web scraping)             │
+│  • selenium (web scraping)                                       │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
 ```

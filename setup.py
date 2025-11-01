@@ -33,7 +33,6 @@ setup(
     extras_require={
         "audio": ["essentia>=2.1b6"],
         "scraping": [
-            "undetected-chromedriver>=3.5.0",
             "selenium>=4.0.0",
         ],
         "dev": [

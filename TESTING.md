@@ -270,7 +270,7 @@ Integration tests require:
 - Network access
 - yt-dlp installed
 - Optional: essentia (for audio analysis)
-- Optional: selenium + undetected-chromedriver (for TuneBat)
+- Optional: selenium (for TuneBat)
 
 Tests automatically skip if dependencies are missing.
 
