@@ -1,0 +1,16 @@
+# See https://pre-commit.com
+# Install: pip install pre-commit
+# Enable in this repo: pre-commit install
+# Run manually: pre-commit run --all-files
+
+default_stages: [pre-commit]
+
+repos:
+  - repo: local
+    hooks:
+      - id: run-all-tests
+        name: Run all tests (unit + integration)
+        entry: bash -lc './run_tests.sh && ./run_integration_tests.sh'
+        language: system
+        pass_filenames: false
+        always_run: true
